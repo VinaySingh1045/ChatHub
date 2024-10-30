@@ -15,6 +15,3 @@ ConnectDb()
     console.log(`Server is not listening on port ${port}`, error);
 })    
 
-//     port, () => {
-//   console.log(`Server is running on port ${port}`);
-// });
