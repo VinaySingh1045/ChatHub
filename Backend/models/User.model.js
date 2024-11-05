@@ -75,7 +75,7 @@ UserSchema.methods.generateAccessToken = function () {
 }
 
 // Method to generate an refresh token using JWT
-UserSchema.methods.generateRefreshTokenSecret = function () {
+UserSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         {
             _id: this._id,
