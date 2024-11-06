@@ -13,7 +13,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 
         // addding and saving the refresh token in db
         user.refreshToken = refreshToken
-        await user.save({validateBeforeSave: false});
+        await user.save({ validateBeforeSave: false });
 
         return {
             accessToken,
@@ -99,7 +99,7 @@ const userLogin = AsyncHandler(async (req, res) => {
 
     // Generating the Refresh and Access Token
 
-    const {  accessToken, refreshToken } = await generateAccessAndRefreshToken(userExists._id)
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(userExists._id)
 
     // Here is two different way to update the userExists, we are updating it because in userExists we did not have access and refresh tokens to update it we need to update 
 
@@ -160,7 +160,71 @@ const userLogout = AsyncHandler(async (req, res) => {
     }
 })
 
+const updateUserProfile = AsyncHandler(async (req, res) => {
+    const allowedUpdates = ["fullName", "themePreference", "contacts"];
+    const updates = req.body;
 
-export { userRegister, userLogin, userLogout }
+    // Filter only allowed fields using reduce
+    const fieldsToUpdate = Object.keys(updates).reduce((acc, key) => {
+        if (allowedUpdates.includes(key)) {
+            acc[key] = updates[key];
+        }
+        return acc;
+    }, {});
+
+    // Check if there are fields to update
+    if (Object.keys(fieldsToUpdate).length === 0) {
+        throw new ApiError(400, "No valid fields provided for update");
+    }
+
+    // Update user fields in the database
+    const updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        { $set: fieldsToUpdate },
+        { new: true }
+    ).select("-password");
+
+    // Return the updated user data
+    return res.status(200).json(
+        new ApiResponse(200, updatedUser, "Updated user profile successfully")
+    );
+});
+
+
+const updateUserAvatar = AsyncHandler(async (req, res) => {
+    
+    // if(!avatarFilePath){
+        //     throw new ApiError(400, "No Avatar Provided")
+        // }
+        if (!req.file || !req.file.path) {
+            throw new ApiError(400, "No Avatar Provided");
+        }
+        const avatarFilePath = req.file.path
+
+    // upload on cloudinary
+    const avatar = await uploadOnCloudinary(avatarFilePath)
+
+    if(!avatar.url){
+        throw new ApiError(400, "avatar file not found")
+    }
+
+    // Update user avatar in the database
+    const updateUserAvatar = await User.findByIdAndUpdate(req.user._id, 
+        {
+            $set: {
+                avatar: avatar.url
+            }
+        },{
+            new: true
+        }
+    ).select("-password")
+
+    return res.status(200).json(
+        new ApiResponse(200, updateUserAvatar, "Updated user avatar successfully")
+    )
+
+})
+
+export { userRegister, userLogin, userLogout, updateUserProfile , updateUserAvatar }
 
 
