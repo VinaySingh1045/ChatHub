@@ -161,21 +161,13 @@ const userLogout = AsyncHandler(async (req, res) => {
 })
 
 const updateUserProfile = AsyncHandler(async (req, res) => {
-    const allowedUpdates = ["fullName", "themePreference", "contacts"];
-    const updates = req.body;
 
-    // Filter only allowed fields using reduce
-    const fieldsToUpdate = Object.keys(updates).reduce((acc, key) => {
-        if (allowedUpdates.includes(key)) {
-            acc[key] = updates[key];
-        }
-        return acc;
-    }, {});
+    const { fullName, themePreference } = req.body
 
-    // Check if there are fields to update
-    if (Object.keys(fieldsToUpdate).length === 0) {
-        throw new ApiError(400, "No valid fields provided for update");
-    }
+    let fieldsToUpdate = {}
+
+    if (fullName) { fieldsToUpdate.fullName = fullName }
+    if (themePreference) { fieldsToUpdate.themePreference = themePreference }
 
     // Update user fields in the database
     const updatedUser = await User.findByIdAndUpdate(
@@ -192,31 +184,31 @@ const updateUserProfile = AsyncHandler(async (req, res) => {
 
 
 const updateUserAvatar = AsyncHandler(async (req, res) => {
-    
+
     // if(!avatarFilePath){
-        //     throw new ApiError(400, "No Avatar Provided")
-        // }
-        if (!req.file || !req.file.path) {
-            throw new ApiError(400, "No Avatar Provided");
-        }
-        const avatarFilePath = req.file.path
+    //     throw new ApiError(400, "No Avatar Provided")
+    // }
+    if (!req.file || !req.file.path) {
+        throw new ApiError(400, "No Avatar Provided");
+    }
+    const avatarFilePath = req.file.path
 
     // upload on cloudinary
     const avatar = await uploadOnCloudinary(avatarFilePath)
 
-    if(!avatar.url){
+    if (!avatar.url) {
         throw new ApiError(400, "avatar file not found")
     }
 
     // Update user avatar in the database
-    const updateUserAvatar = await User.findByIdAndUpdate(req.user._id, 
+    const updateUserAvatar = await User.findByIdAndUpdate(req.user._id,
         {
             $set: {
                 avatar: avatar.url
             }
-        },{
-            new: true
-        }
+        }, {
+        new: true
+    }
     ).select("-password")
 
     return res.status(200).json(
@@ -225,6 +217,62 @@ const updateUserAvatar = AsyncHandler(async (req, res) => {
 
 })
 
-export { userRegister, userLogin, userLogout, updateUserProfile , updateUserAvatar }
+const searchUsers = AsyncHandler(async (req, res) => {
+    const { searchTerm } = req.query
+
+    if (!searchTerm) {
+        throw new ApiError(400, "Search term is required");
+    }
+
+    const users = await User.find({
+        $or: [
+
+            { fullName: { $regex: searchTerm, $options: 'i' } },
+            { email: { $regex: searchTerm, $options: 'i' } },
+        ],
+        _id: { $ne: req.user._id }  // Exclude the logged in user from the search results list 
+    }).select("fullName email avatar contacts")
+    .populate("contacts")
+  
+    return res.status(200).json(
+        new ApiResponse(200, users, "Search users successfully")
+    );
+
+
+})
+
+const getLoginUsers = AsyncHandler(async (req, res) => {
+
+    return res.status(200).json(
+        new ApiResponse(200, req.user, "User fetch Successfully")
+    )
+
+})
+
+// update User's Contacts list
+const updateUserContacts = AsyncHandler(async (req, res) => {
+    const { contacts } = req.body
+
+    if (!Array.isArray(contacts) || !contacts.length) {
+        throw new ApiError(400, "Invalid contacts list")
+    }
+
+    const updateuser = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $addToSet: { contacts: { $each: contacts } }
+        },
+        {
+            new: true
+        }
+    ).select("-password")
+
+    return res.status(200).json(
+        new ApiResponse(200, updateuser, "User added Successfully")
+    )
+
+})
+
+export { userRegister, userLogin, userLogout, updateUserProfile, updateUserAvatar, searchUsers, getLoginUsers, updateUserContacts }
 
 
