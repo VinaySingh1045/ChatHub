@@ -3,7 +3,7 @@ import { getLoginUsers, searchUsers, updateUserAvatar, updateUserContacts, updat
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
-export const router = Router();
+export const router = Router(); 
 
 router.route("/register").post(
     upload.single("avatar")
