@@ -1,4 +1,5 @@
 import { Message } from "../models/Message.model.js";
+import { ApiError } from "../utlis/ApiError.js";
 import { ApiResponse } from "../utlis/ApiResponse.js";
 import { AsyncHandler } from "../utlis/AsyncHandler.js";
 
@@ -41,4 +42,26 @@ const sendMessage = AsyncHandler(async (req, res) => {
 
 })
 
-export { sendMessage }
+const getMessage = AsyncHandler(async (req, res) => {
+    
+    const {sender, receiver} = req.body;
+
+    if(!sender || !receiver) {
+        throw new ApiError(400, "Sender and receiver are required to fetch messages")
+    }
+
+    // Fetch the messages between the sender and receiver
+    const messages = await Message.find({
+        $or:[
+            {sender, receiver},
+            {sender: receiver , receiver: sender}
+        ]
+    }).sort({timestamp: 1});
+
+    return res.status(200).json(
+        new ApiResponse(200, messages, "Message Fetch Successfully")
+    )
+
+})
+
+export { sendMessage, getMessage }
