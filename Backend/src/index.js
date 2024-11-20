@@ -23,7 +23,7 @@ const io = new Server(server, {
 ConnectDb()
 
     .then(() => {
-        app.listen(port, () => {
+        server.listen(port, () => {
             console.log(`Server is running on port ${port}`);
         })
     })
@@ -34,8 +34,17 @@ ConnectDb()
 io.on("connection", (socket) => {
     console.log("Connected Suuccessfully ", socket.id);
 
-    io.on("disconnect", (socket) => {
-        console.log("Disconnected Suuccessfully ", socket.id);
+    // socket.on("sendChatMessage", (chatMessage) =>{
+    //     io.emit("sendChatMessage", chatMessage); // Jo message bhej the hai vo dekhta hai 
+    // })    
+
+    socket.on("joinRoom", (userId) => {
+        socket.join(userId);
+        console.log(`User ${userId} joined room ${userId}`);
+    })
+
+    socket.on("sendChatMessage", ({ reciever, message }) => {
+        io.to(reciever).emit("sendChatMessage", message)
     })
 
 })

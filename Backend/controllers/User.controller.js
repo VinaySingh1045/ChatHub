@@ -56,7 +56,7 @@ const userRegister = AsyncHandler(async (req, res) => {
     }
 
     const avatar = await uploadOnCloudinary(avatarFilePath);
-    console.log("Cloudinary response avatar: ", avatar);
+    // console.log("Cloudinary response avatar: ", avatar);
 
     // Create the user
     const user = await User.create({

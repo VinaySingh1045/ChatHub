@@ -8,17 +8,17 @@ import { AsyncHandler } from "../utlis/AsyncHandler.js";
 const sendMessage = AsyncHandler(async (req, res) => {
     // Extracting the necessary data from the request body
 
-    const { sender, receiver, content } = req.body
+    const {receiver, content } = req.body
 
     // Check if all required fields are present
-    if (!sender || !receiver || !content) {
+    if (!receiver || !content) {
         throw new ApiError(400, "Sender, receiver, and content are required fields");
     }
 
     // Creating the message object to be sent to the receiver
 
     const newMessage = new Message({
-        sender,
+        sender:  req.user._id,
         receiver,
         content,
         timestamp: new Date()
@@ -34,7 +34,8 @@ const sendMessage = AsyncHandler(async (req, res) => {
         throw new ApiError(500, "Socket.io instance not found");
     }
 
-    io.to(receiver).emit('newMessage', savedMessage); // Emit to receiver
+    // io.to(<socket_id>).emit() used to send events to specific client
+    io.to(receiver).emit('sendChatMessage', savedMessage); // Emit to receiver
 
     return res.status(200).json(
         new ApiResponse(200, savedMessage, "Message sent successfully")
@@ -42,26 +43,31 @@ const sendMessage = AsyncHandler(async (req, res) => {
 
 })
 
+// Creating the GetApi 
 const getMessage = AsyncHandler(async (req, res) => {
-    
-    const {sender, receiver} = req.body;
 
-    if(!sender || !receiver) {
+    const { sender, receiver } = req.body;
+
+    if (!sender || !receiver) {
         throw new ApiError(400, "Sender and receiver are required to fetch messages")
     }
 
     // Fetch the messages between the sender and receiver
     const messages = await Message.find({
-        $or:[
-            {sender, receiver},
-            {sender: receiver , receiver: sender}
+        $or: [
+            { sender, receiver },
+            { sender: receiver, receiver: sender }
         ]
-    }).sort({timestamp: 1});
+    }).sort({ timestamp: 1 });
 
     return res.status(200).json(
         new ApiResponse(200, messages, "Message Fetch Successfully")
     )
 
 })
+
+// Creating a status Api that messages read from the user
+
+
 
 export { sendMessage, getMessage }
