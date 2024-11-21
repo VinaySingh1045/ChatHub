@@ -110,7 +110,7 @@ const userLogin = AsyncHandler(async (req, res) => {
 
     // 2. Call the model again and update it now what will be faster you have to decided 1. one or a second.
 
-    const user = await User.findById(userExists._id).select("-password -refreshToken")
+    const user = await User.findById(userExists._id).select("-password -refreshToken").populate("contacts")
 
     // Set cookies options
     const options = {
@@ -162,12 +162,13 @@ const userLogout = AsyncHandler(async (req, res) => {
 
 const updateUserProfile = AsyncHandler(async (req, res) => {
 
-    const { fullName, themePreference } = req.body
+    const { fullName, themePreference, bio } = req.body
 
     let fieldsToUpdate = {}
 
     if (fullName) { fieldsToUpdate.fullName = fullName }
     if (themePreference) { fieldsToUpdate.themePreference = themePreference }
+    if (bio) { fieldsToUpdate.bio = bio }
 
     // Update user fields in the database
     const updatedUser = await User.findByIdAndUpdate(
@@ -230,10 +231,10 @@ const searchUsers = AsyncHandler(async (req, res) => {
             { fullName: { $regex: searchTerm, $options: 'i' } },
             { email: { $regex: searchTerm, $options: 'i' } },
         ],
-        _id: { $ne: req.user._id }  // Exclude the logged in user from the search results list 
+        _id: { $ne: req.user._id }  // Exclude the logged in user from the search results list // one note exculed is not working properly b/c we have changed in routes...
     }).select("fullName email avatar contacts")
-    .populate("contacts")
-  
+        .populate("contacts")
+
     return res.status(200).json(
         new ApiResponse(200, users, "Search users successfully")
     );
@@ -245,6 +246,15 @@ const getLoginUsers = AsyncHandler(async (req, res) => {
 
     return res.status(200).json(
         new ApiResponse(200, req.user, "User fetch Successfully")
+    )
+
+})
+
+const getAllUsers = AsyncHandler(async (req, res) => {
+    const users = await User.find({ _id: { $ne: req.user._id } }).select("fullName email avatar contacts")
+
+    return res.status(200).json(
+        new ApiResponse(200, users, "All users fetched successfully")
     )
 
 })
@@ -273,6 +283,6 @@ const updateUserContacts = AsyncHandler(async (req, res) => {
 
 })
 
-export { userRegister, userLogin, userLogout, updateUserProfile, updateUserAvatar, searchUsers, getLoginUsers, updateUserContacts }
+export { userRegister, userLogin, userLogout, updateUserProfile, updateUserAvatar, searchUsers, getLoginUsers, updateUserContacts, getAllUsers }
 
 

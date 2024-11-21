@@ -3,10 +3,13 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { USER_API_END_POINT } from "../utils/constant"
 import { toast } from "sonner"
+import { useDispatch } from "react-redux"
+import { setUser } from "@/features/authSlice"
 
 const Login = () => {
 
     const navigate = useNavigate()
+    const dispatch = useDispatch();
     const [userData, setUserData] = useState({
         email: '',
         password: '',
@@ -27,14 +30,17 @@ const Login = () => {
                 withCredentials: true
             })
 
-            console.log(res)
+            // console.log(res.data.data)
 
             if (res.data.success) {
                 // const userInfo = res.data.data.user
+                const userInfo = res.data.data
+                dispatch(setUser(userInfo))
                 toast.success(res.data.message)
                 navigate('/')
             } else {
                 alert('Invalid email or password')
+                // toast.error(res.data.message)
             }
 
             if (res.status === 200) {
@@ -44,7 +50,9 @@ const Login = () => {
                 })
             }
         } catch (error) {
-            console.log(error.message)
+            // console.log(error)
+            toast.error(error)
+
         }
         finally {
             setLoading(false)

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getLoginUsers, searchUsers, updateUserAvatar, updateUserContacts, updateUserProfile, userLogin, userLogout, userRegister } from "../controllers/User.controller.js";
+import { getAllUsers, getLoginUsers, searchUsers, updateUserAvatar, updateUserContacts, updateUserProfile, userLogin, userLogout, userRegister } from "../controllers/User.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -16,6 +16,9 @@ router.route("/updateAvatar").put(verifyJWT, upload.single("avatar"),updateUserA
 router.route("/updateContacts").put(verifyJWT, updateUserContacts)
 router.route("/searchUsers").get(verifyJWT, searchUsers)
 router.route("/getLoginUsers").get(verifyJWT, getLoginUsers)
+
+// router.route("/getAllUsers").get(verifyJWT, getAllUsers)
+// apne ko abhi vahi users chaiye jisko hum add kare in contact 
 
 
 
