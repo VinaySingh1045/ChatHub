@@ -4,7 +4,7 @@ import { getMessage, sendMessage } from "../controllers/Message.controller.js";
 
 export const router = Router();
 
-router.route("/sendMessage").post(sendMessage, verifyJWT);
-router.route("/getMessage").get(getMessage, verifyJWT);
+router.route("/sendMessage").post(verifyJWT, sendMessage);
+router.route("/getMessage").get(verifyJWT, getMessage);
 
 

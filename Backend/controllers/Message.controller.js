@@ -8,24 +8,33 @@ import { AsyncHandler } from "../utlis/AsyncHandler.js";
 const sendMessage = AsyncHandler(async (req, res) => {
     // Extracting the necessary data from the request body
 
-    const {receiver, content } = req.body
+    const { receiver, content } = req.body
+    console.log(receiver, "Content: ", content);
 
     // Check if all required fields are present
     if (!receiver || !content) {
-        throw new ApiError(400, "Sender, receiver, and content are required fields");
+        throw new ApiError(400, "receiver, and content are required fields");
     }
 
     // Creating the message object to be sent to the receiver
 
     const newMessage = new Message({
-        sender:  req.user._id,
+        sender: req.user._id,
         receiver,
         content,
         timestamp: new Date()
     })
 
+    if (!newMessage) {
+        throw new ApiError(500, "Failed to create message");
+    }
+
     // Save the message in the database
     const savedMessage = await newMessage.save()
+
+    if (!savedMessage) {
+        throw new ApiError(500, "Failed to save message in database");
+    }
 
     // Emit the message to the receiver using Socket.io
     const io = req.app.get('io'); // Get the io instance set in index.js
@@ -45,8 +54,9 @@ const sendMessage = AsyncHandler(async (req, res) => {
 
 // Creating the GetApi 
 const getMessage = AsyncHandler(async (req, res) => {
-
-    const { sender, receiver } = req.body;
+    
+    const sender = req.user?._id;
+    const { receiver } = req.query;
 
     if (!sender || !receiver) {
         throw new ApiError(400, "Sender and receiver are required to fetch messages")

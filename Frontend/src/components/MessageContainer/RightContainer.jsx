@@ -1,13 +1,44 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MESSAGE_API_END_POINT } from "../utils/constant";
+import { useSelector } from "react-redux";
 
 const RightContainer = ({ activeUser }) => {
 
+    const { user } = useSelector(state => state.auth)
+    // console.log(user?.user?._id)
+
+    // console.log(activeUser?._id)
     const [message, setMessage] = useState("")
+    // console.log(message);
+
+    const [messages, setMessages] = useState([])
+    // console.log(messages)
 
     const handleChange = (e) => {
-        setMessage({ ...message, [e.target.name]: e.target.value })
+        setMessage(e.target.value)
+    }
+    useEffect(() => {
+      getMessage()
+    }, [])
+    
+
+    const getMessage = async () => {
+        try {
+            const res = await axios.get(`${MESSAGE_API_END_POINT}/getMessage`, {
+                params: {
+                    receiver: activeUser?._id
+                },
+                withCredentials: true
+            })
+            if (res.data.success) {
+                // console.log("Fetched messages:", res.data.data);
+                // Update your state with the fetched messages
+                setMessages((prev)=> res.data.data);
+            }
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     const handleSendMessage = async (e) => {
@@ -15,9 +46,23 @@ const RightContainer = ({ activeUser }) => {
         // console.log(message)
 
         try {
-            const res = await axios.post(`${MESSAGE_API_END_POINT}sendMessage`,{
-                withCredentials: true
-            })
+            const res = await axios.post(`${MESSAGE_API_END_POINT}/sendMessage`,
+                {
+                    receiver: activeUser?._id,
+                    content: message,
+                },
+                {
+                    withCredentials: true
+                }
+            )
+
+            if (res.data.success) {
+                console.log("Message sent successfully:", res.data.data);
+                // Optionally reset the input field after sending
+                setMessages((prev) => [...prev, res.data.data]);
+                setMessage("");
+            }
+
         } catch (error) {
             console.log(error)
         }
@@ -51,9 +96,25 @@ const RightContainer = ({ activeUser }) => {
             </div>
 
             {/* Messages */}
+
             <div className="flex-1 overflow-y-auto p-4">
                 <div className="flex flex-col gap-4">
-                    <p className="text-gray-500 text-center">Start chatting with {activeUser?.fullName}</p>
+                    {messages.map((msg, index) => (
+                        <div
+                            key={index}
+                            className={`flex ${msg.sender === user?.user?._id ? "justify-end" : "justify-start"
+                                }`}
+                        >
+                            <div
+                                className={`${msg.sender === user?.user?._id
+                                        ? "bg-blue-500 text-white"
+                                        : "bg-gray-200 text-black"
+                                    } px-4 py-2 rounded-lg max-w-xs`}
+                            >
+                                {msg.content}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
 
@@ -66,7 +127,7 @@ const RightContainer = ({ activeUser }) => {
                         className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-600"
                         name="message"
                         id="message"
-                        value={message.message}
+                        value={message}
                         onChange={handleChange}
                     />
                     <button onClick={handleSendMessage} className="p-2 bg-blue-500 text-white rounded-lg">
