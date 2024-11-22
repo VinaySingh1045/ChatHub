@@ -2,16 +2,18 @@ import axios from 'axios';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { USER_API_END_POINT } from '../utils/constant';
-// import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+
 const LeftContainer = ({ onSelectUser }) => {
     const [query, setQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    // const { user } = useSelector((state) => state.auth);
-
-
-    // const u = useSelector((state) => state.auth.user);
-    // console.log(u)
+    const { user } = useSelector((state) => state.auth);
+    
+    // Console log to check the structure of the user object
+    // console.log('User from Redux:', user);
+    // console.log('Contacts from User:', user?.user?.contacts);
 
     const handleChange = (e) => {
         const searchValue = e.target.value;
@@ -20,45 +22,48 @@ const LeftContainer = ({ onSelectUser }) => {
         if (searchValue.trim()) {
             fetchSearchResults(searchValue);
         } else {
-            setSearchResults([]); // Clear results if the input is empty
+            setSearchResults([]); // Clear search results if query is empty
         }
     };
 
     const fetchSearchResults = async (searchTerm) => {
         try {
-            const res = await axios.get(`${USER_API_END_POINT}/searchUsers?searchTerm=${searchTerm}`,
+            setLoading(true);
+            const res = await axios.get(
+                `${USER_API_END_POINT}/searchUsers?searchTerm=${searchTerm}`,
                 { withCredentials: true }
             );
-            // console.log(res.data.data)
             if (res.data.success) {
                 setSearchResults(res.data.data);
             } else {
                 console.error("Error fetching search results");
+                setSearchResults([]);
             }
         } catch (error) {
             console.error("Fetch error:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleUserClick = async (user) => {
+    const handleUserClick = async (selectedUser) => {
         try {
-            const res = await axios.put(`${USER_API_END_POINT}/updateContacts`,
-                {
-                    contacts: [user._id]
-                },
+            const res = await axios.put(
+                `${USER_API_END_POINT}/updateContacts`,
+                { contacts: [selectedUser._id] },
                 { withCredentials: true }
-            )
-            // console.log(res.data.data)
+            );
+
             if (res.data.success) {
                 console.log("User added to contacts successfully");
-                onSelectUser(user); // Pass the selected user to the parent component
+                onSelectUser(selectedUser); // Notify parent component
             } else {
                 console.error("Failed to add user to contacts");
             }
         } catch (error) {
-            console.log(error)
+            console.error("Error updating contacts:", error);
         }
-    }
+    };
 
     return (
         <div className="w-full lg:w-1/4 bg-white border-r">
@@ -66,10 +71,7 @@ const LeftContainer = ({ onSelectUser }) => {
                 <h1 className="text-lg font-bold text-blue-600">Messaging</h1>
                 <div className="mt-4">
                     <div className="flex items-center gap-3 px-4 py-2 bg-white border border-gray-300 rounded-full shadow-sm hover:shadow-md focus-within:ring-2 focus-within:ring-blue-500">
-                        {/* Search Icon */}
                         <Search className="text-gray-500" />
-
-                        {/* Search Input */}
                         <input
                             type="text"
                             name="search"
@@ -83,30 +85,60 @@ const LeftContainer = ({ onSelectUser }) => {
                 </div>
             </div>
             <div className="overflow-y-auto">
-                {searchResults.length > 0 ? (
-                    searchResults.map((user) => (
+                {loading ? (
+                    <div className="p-4 text-center">
+                        <span className="loader"></span> {/* Replace with a spinner */}
+                        <p className="text-sm text-gray-500">Searching...</p>
+                    </div>
+                ) : query.trim() ? (
+                    searchResults.length > 0 ? (
+                        searchResults.map((us) => (
+                            <div
+                                key={us._id}
+                                className="flex items-center gap-4 p-2 hover:bg-gray-100 cursor-pointer border-b-2"
+                                onClick={() => handleUserClick(us)}
+                            >
+                                <div className="relative">
+                                    <img
+                                        src={us.avatar || "https://via.placeholder.com/150"}
+                                        alt={us.fullName}
+                                        className="w-10 h-10 rounded-full"
+                                    />
+                                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-white"></span>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium">{us.fullName}</p>
+                                    <p className="text-xs text-gray-500">{us.email}</p>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="p-4 text-sm text-gray-500">No results found</p>
+                    )
+                ) : user?.user?.contacts?.length > 0 ? (
+                    user.user.contacts.map((contact) => (
                         <div
-                            key={user._id}
+                            key={contact._id}
                             className="flex items-center gap-4 p-2 hover:bg-gray-100 cursor-pointer border-b-2"
-                            onClick={() => handleUserClick(user)}
+                            onClick={() => onSelectUser(contact)}
                         >
                             <div className="relative">
                                 <img
-                                    src={user.avatar || "https://via.placeholder.com/150"}
-                                    alt={user.fullName}
+                                    src={contact.avatar || "https://via.placeholder.com/150"}
+                                    alt={contact.fullName}
                                     className="w-10 h-10 rounded-full"
                                 />
                                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-white"></span>
                             </div>
                             <div>
-                                <p className="text-sm font-medium">{user.fullName}</p>
-                                <p className="text-xs text-gray-500">{user.email}</p>
+                                <p className="text-sm font-medium">{contact.fullName}</p>
+                                <p className="text-xs text-gray-500">{contact.email}</p>
                             </div>
                         </div>
                     ))
                 ) : (
                     <p className="p-4 text-sm text-gray-500">
-                        {query ? "No results found" : "Start searching for friends"}
+                        You don’t have any contacts yet. Start searching to add new friends!
                     </p>
                 )}
             </div>

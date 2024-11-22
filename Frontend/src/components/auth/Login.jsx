@@ -39,8 +39,8 @@ const Login = () => {
                 toast.success(res.data.message)
                 navigate('/')
             } else {
-                alert('Invalid email or password')
-                // toast.error(res.data.message)
+                navigate("/login")
+                toast.error(res.data.message)
             }
 
             if (res.status === 200) {

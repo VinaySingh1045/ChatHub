@@ -13,17 +13,6 @@ const Home = () => {
 
 
     return (
-
-        // <>
-        //     <div className="flex flex-col h-[90vh] bg-gray-100 lg:flex-row">
-        //         {/* Sidebar */}
-        //         <LeftContainer />
-
-        //         {/* Chat Area */}
-        //         <RightContainer />
-
-        //     </div>
-        // </>
         <>
             <div className="flex flex-col h-[90vh] bg-gray-100 lg:flex-row">
                 {/* Sidebar */}
@@ -31,7 +20,7 @@ const Home = () => {
 
                 {/* Chat Area */}
                 {activeChatUser ? (
-                    <RightContainer user={activeChatUser} />
+                    <RightContainer activeUser={activeChatUser} />
                 ) : (
                     <div className="flex-1 flex items-center justify-center">
                         <p className="text-gray-500">Select a user to start chatting</p>
