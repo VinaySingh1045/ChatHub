@@ -1,74 +1,80 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
-import { MESSAGE_API_END_POINT } from "../utils/constant";
 import { useSelector } from "react-redux";
+import axios from "axios";
+import { io } from "socket.io-client";
+import { MESSAGE_API_END_POINT } from "../utils/constant";
+
+const socket = io("http://localhost:3000", { withCredentials: true });
 
 const RightContainer = ({ activeUser }) => {
+    const { user } = useSelector((state) => state.auth);
+    const [message, setMessage] = useState("");
+    const [messages, setMessages] = useState([]);
 
-    const { user } = useSelector(state => state.auth)
-    // console.log(user?.user?._id)
-
-    // console.log(activeUser?._id)
-    const [message, setMessage] = useState("")
-    // console.log(message);
-
-    const [messages, setMessages] = useState([])
-    // console.log(messages)
-
-    const handleChange = (e) => {
-        setMessage(e.target.value)
-    }
     useEffect(() => {
-      getMessage()
-    }, [])
-    
+        if (user?.user?._id) {
+            socket.emit("joinRoom", user?.user?._id); // Join user's room
+        }
+    }, [user]);
+
+    useEffect(() => {
+        getMessage();
+
+        // Listen for real-time messages and update messages for both sender and receiver
+        socket.on("sendChatMessage", (newMessage) => {
+            if (newMessage.sender === activeUser?._id || newMessage.receiver === activeUser?._id) {
+                setMessages((prev) => [...prev, newMessage]);
+            }
+        });
+
+        // Cleanup listener on component unmount
+        return () => {
+            socket.off("sendChatMessage");
+        };
+    }, [activeUser]);
 
     const getMessage = async () => {
         try {
             const res = await axios.get(`${MESSAGE_API_END_POINT}/getMessage`, {
                 params: {
-                    receiver: activeUser?._id
+                    receiver: activeUser?._id,
                 },
-                withCredentials: true
-            })
+                withCredentials: true,
+            });
             if (res.data.success) {
-                // console.log("Fetched messages:", res.data.data);
-                // Update your state with the fetched messages
-                setMessages((prev)=> res.data.data);
+                setMessages(res.data.data);
             }
         } catch (error) {
-            console.log(error)
+            console.error(error);
         }
-    }
+    };
 
     const handleSendMessage = async (e) => {
-        e.preventDefault()
-        // console.log(message)
+        e.preventDefault();
 
         try {
-            const res = await axios.post(`${MESSAGE_API_END_POINT}/sendMessage`,
+            const res = await axios.post(
+                `${MESSAGE_API_END_POINT}/sendMessage`,
                 {
                     receiver: activeUser?._id,
                     content: message,
                 },
                 {
-                    withCredentials: true
+                    withCredentials: true,
                 }
-            )
+            );
 
             if (res.data.success) {
-                console.log("Message sent successfully:", res.data.data);
-                // Optionally reset the input field after sending
-                setMessages((prev) => [...prev, res.data.data]);
-                setMessage("");
+                // Update messages for the sender
+                const newMessage = res.data.data; // This is the message returned after sending
+
+                setMessages((prev) => [...prev, newMessage]); // Add the sender's message to the state
+                setMessage(""); // Reset the input field
             }
-
         } catch (error) {
-            console.log(error)
+            console.error(error);
         }
-
-
-    }
+    };
 
     return (
         <div className="flex-1 flex flex-col">
@@ -96,20 +102,19 @@ const RightContainer = ({ activeUser }) => {
             </div>
 
             {/* Messages */}
-
             <div className="flex-1 overflow-y-auto p-4">
                 <div className="flex flex-col gap-4">
                     {messages.map((msg, index) => (
                         <div
                             key={index}
-                            className={`flex ${msg.sender === user?.user?._id ? "justify-end" : "justify-start"
-                                }`}
+                            className={`flex ${msg.sender === user?.user?._id ? "justify-end" : "justify-start"}`}
                         >
                             <div
-                                className={`${msg.sender === user?.user?._id
+                                className={`${
+                                    msg.sender === user?.user?._id
                                         ? "bg-blue-500 text-white"
                                         : "bg-gray-200 text-black"
-                                    } px-4 py-2 rounded-lg max-w-xs`}
+                                } px-4 py-2 rounded-lg max-w-xs`}
                             >
                                 {msg.content}
                             </div>
@@ -128,10 +133,12 @@ const RightContainer = ({ activeUser }) => {
                         name="message"
                         id="message"
                         value={message}
-                        onChange={handleChange}
+                        onChange={(e) => setMessage(e.target.value)}
                     />
                     <button onClick={handleSendMessage} className="p-2 bg-blue-500 text-white rounded-lg">
-                        <i> <img src="/send_image.png" alt="" className="h-10" /> </i>
+                        <i>
+                            <img src="/send_image.png" alt="" className="h-10" />
+                        </i>
                     </button>
                 </div>
             </div>

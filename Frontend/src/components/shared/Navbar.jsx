@@ -1,16 +1,18 @@
 import { LogOutIcon, UserIcon } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import axios from "axios";
 import { USER_API_END_POINT } from "../utils/constant";
 import { setUser } from "@/features/authSlice";
 import { toast } from "sonner";
+import Profile from "../UserProfile/Profile";
 
 const Navbar = () => {
     const { user } = useSelector((state) => state.auth);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -73,7 +75,7 @@ const Navbar = () => {
                                     <div className="flex items-center">
                                         <UserIcon className="h-6 w-6 text-gray-500 mt-4 mx-2" />
                                         <p className="mt-4">
-                                            <button className="text-[19px] ml-4">Your Profile</button>
+                                            <button onClick={() => setIsProfileOpen(true)} className="text-[19px] ml-4">Your Profile</button>
                                         </p>
                                     </div>
                                     <div className="flex items-center">
@@ -89,16 +91,18 @@ const Navbar = () => {
                         <>
                             <div className='flex gap-2'>
                                 <Link to={"/login"}>
-                                    <button className='bg-[#159788] p-3 rounded-lg'>Login</button>
+                                    <button className='bg-blue-500 text-white font-bold p-3 rounded-lg'>Login</button>
                                 </Link>
                                 <Link to={"/signup"}>
-                                    <button className='bg-[#159788] p-3 rounded-lg'>Signup</button>
+                                    <button className='bg-blue-500 text-white font-bold p-3 rounded-lg'>Signup</button>
                                 </Link>
                             </div>
+
                         </>
                     }
                 </div>
             </div>
+            {isProfileOpen && <Profile open={isProfileOpen} setOpen={setIsProfileOpen} />}
         </>
     );
 };

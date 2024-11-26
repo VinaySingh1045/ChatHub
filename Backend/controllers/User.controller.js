@@ -75,7 +75,7 @@ const userRegister = AsyncHandler(async (req, res) => {
 const userLogin = AsyncHandler(async (req, res) => {
     const { email, password } = req.body
 
-    console.log("Request Body:", req.body);
+    // console.log("Request Body:", req.body);
 
     // Validation
     if (!email || !password) {

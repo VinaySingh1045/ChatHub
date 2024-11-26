@@ -9,6 +9,7 @@ import Login from './components/auth/Login'
 import { Toaster } from 'sonner'
 import { Provider } from 'react-redux'
 import { store } from './app/store.js'
+import Profile from './components/UserProfile/Profile'
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: "/login",
         element: <Login />
+      },
+      {
+        path: "/profile",
+        element: <Profile/>
       },
     ]
 

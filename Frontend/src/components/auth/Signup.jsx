@@ -191,14 +191,14 @@ const Signup = () => {
                         {
                             loading ? (<div className="mb-6">
                                 <button
-                                    className="bg-[#159788] text-white font-bold py-2 px-4 rounded w-full"
+                                    className="bg-blue-500 text-white font-bold py-2 px-4 rounded w-full"
                                 >
                                     Please wait
                                 </button>
                             </div>) : (<div className="mb-6">
                                 <button
                                     type="submit"
-                                    className="bg-[#159788] text-white font-bold py-2 px-4 rounded w-full"
+                                    className="bg-blue-500 text-white font-bold py-2 px-4 rounded w-full"
                                 >
                                     Signup
                                 </button>

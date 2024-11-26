@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Search } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 import { useState } from 'react';
 import { USER_API_END_POINT } from '../utils/constant';
 import { useSelector } from 'react-redux';
@@ -86,8 +86,8 @@ const LeftContainer = ({ onSelectUser }) => {
             </div>
             <div className="overflow-y-auto">
                 {loading ? (
-                    <div className="p-4 text-center">
-                        <span className="loader"></span> {/* Replace with a spinner */}
+                    <div className="p-4 text-center flex gap-3">
+                        <span className="loader"><Loader2/></span>
                         <p className="text-sm text-gray-500">Searching...</p>
                     </div>
                 ) : query.trim() ? (
