@@ -1,15 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { io } from "socket.io-client";
-import { MESSAGE_API_END_POINT } from "../utils/constant";
+import { MESSAGE_API_END_POINT, SOCKETIO_API_END_POINT } from "../utils/constant";
+import { PhoneCall, VideoIcon } from "lucide-react";
+import { toast } from "sonner";
 
-const socket = io("http://localhost:3000", { withCredentials: true });
+const socket = io(SOCKETIO_API_END_POINT, { withCredentials: true });
 
 const RightContainer = ({ activeUser }) => {
     const { user } = useSelector((state) => state.auth);
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
+    const messagesEndRef = useRef(null);
+
+    // Scroll to the bottom whenever messages change
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
     useEffect(() => {
         if (user?.user?._id) {
@@ -27,11 +39,14 @@ const RightContainer = ({ activeUser }) => {
             }
         });
 
-        // Cleanup listener on component unmount
         return () => {
             socket.off("sendChatMessage");
         };
     }, [activeUser]);
+
+    const handleClick = () => {
+        toast.info("Coming Soon!");
+    }
 
     const getMessage = async () => {
         try {
@@ -65,11 +80,9 @@ const RightContainer = ({ activeUser }) => {
             );
 
             if (res.data.success) {
-                // Update messages for the sender
-                const newMessage = res.data.data; // This is the message returned after sending
-
-                setMessages((prev) => [...prev, newMessage]); // Add the sender's message to the state
-                setMessage(""); // Reset the input field
+                const newMessage = res.data.data; 
+                setMessages((prev) => [...prev, newMessage]); 
+                setMessage("");
             }
         } catch (error) {
             console.error(error);
@@ -92,11 +105,11 @@ const RightContainer = ({ activeUser }) => {
                     </div>
                 </div>
                 <div className="flex gap-4">
-                    <button className="p-2 bg-gray-200 rounded-full">
-                        <i className="fas fa-video"></i>
+                    <button onClick={handleClick} className="p-2 bg-gray-200 rounded-full">
+                        <i className=""><VideoIcon /></i>
                     </button>
-                    <button className="p-2 bg-gray-200 rounded-full">
-                        <i className="fas fa-phone"></i>
+                    <button onClick={handleClick} className="p-2 bg-gray-200 rounded-full">
+                        <i className=""><PhoneCall /></i>
                     </button>
                 </div>
             </div>
@@ -107,19 +120,28 @@ const RightContainer = ({ activeUser }) => {
                     {messages.map((msg, index) => (
                         <div
                             key={index}
-                            className={`flex ${msg.sender === user?.user?._id ? "justify-end" : "justify-start"}`}
+                            className={`flex ${msg.sender === user?.user?._id ? "justify-end" : "justify-start"
+                                }`}
                         >
                             <div
-                                className={`${
-                                    msg.sender === user?.user?._id
-                                        ? "bg-blue-500 text-white"
-                                        : "bg-gray-200 text-black"
-                                } px-4 py-2 rounded-lg max-w-xs`}
+                                className={`${msg.sender === user?.user?._id
+                                    ? "bg-blue-500 text-white self-end"
+                                    : "bg-gray-200 text-black self-start"
+                                    } px-6 py-4 rounded-lg max-w-sm shadow-md transition-all duration-300`}
                             >
-                                {msg.content}
+                                <div className="flex gap-4">
+                                    <div className="text-sm mb-2">
+                                        {msg.content}
+                                    </div>
+                                    <span className="text-xs self-end">
+                                        {msg.timestamp.split('T')[1].split(':').slice(0, 2).join(':')}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     ))}
+                    {/* Reference for scrolling */}
+                    <div ref={messagesEndRef} />
                 </div>
             </div>
 
@@ -137,7 +159,7 @@ const RightContainer = ({ activeUser }) => {
                     />
                     <button onClick={handleSendMessage} className="p-2 bg-blue-500 text-white rounded-lg">
                         <i>
-                            <img src="/send_image.png" alt="" className="h-10" />
+                            <img src="/send_image.png" alt="" className="h-7" />
                         </i>
                     </button>
                 </div>

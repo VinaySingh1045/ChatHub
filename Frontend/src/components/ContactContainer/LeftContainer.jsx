@@ -10,10 +10,6 @@ const LeftContainer = ({ onSelectUser }) => {
     const [loading, setLoading] = useState(false);
 
     const { user } = useSelector((state) => state.auth);
-    
-    // Console log to check the structure of the user object
-    // console.log('User from Redux:', user);
-    // console.log('Contacts from User:', user?.user?.contacts);
 
     const handleChange = (e) => {
         const searchValue = e.target.value;
@@ -22,7 +18,7 @@ const LeftContainer = ({ onSelectUser }) => {
         if (searchValue.trim()) {
             fetchSearchResults(searchValue);
         } else {
-            setSearchResults([]); // Clear search results if query is empty
+            setSearchResults([]); 
         }
     };
 
@@ -56,7 +52,7 @@ const LeftContainer = ({ onSelectUser }) => {
 
             if (res.data.success) {
                 console.log("User added to contacts successfully");
-                onSelectUser(selectedUser); // Notify parent component
+                onSelectUser(selectedUser); 
             } else {
                 console.error("Failed to add user to contacts");
             }
@@ -87,7 +83,7 @@ const LeftContainer = ({ onSelectUser }) => {
             <div className="overflow-y-auto">
                 {loading ? (
                     <div className="p-4 text-center flex gap-3">
-                        <span className="loader"><Loader2/></span>
+                        <span className="loader"><Loader2 /></span>
                         <p className="text-sm text-gray-500">Searching...</p>
                     </div>
                 ) : query.trim() ? (
@@ -116,7 +112,7 @@ const LeftContainer = ({ onSelectUser }) => {
                         <p className="p-4 text-sm text-gray-500">No results found</p>
                     )
                 ) : user?.user?.contacts?.length > 0 ? (
-                    user.user.contacts.map((contact) => (
+                    user.user?.contacts.map((contact) => (
                         <div
                             key={contact._id}
                             className="flex items-center gap-4 p-2 hover:bg-gray-100 cursor-pointer border-b-2"

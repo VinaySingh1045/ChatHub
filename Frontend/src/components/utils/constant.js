@@ -1,2 +1,3 @@
-export const USER_API_END_POINT = "http://localhost:3000/api/v1/users"
-export const MESSAGE_API_END_POINT = "http://localhost:3000/api/v1/messages"
+export const USER_API_END_POINT = import.meta.env.VITE_REACT_APP_USER_API_END_POINT
+export const MESSAGE_API_END_POINT = import.meta.env.VITE_REACT_APP_MESSAGE_API_END_POINT
+export const SOCKETIO_API_END_POINT = import.meta.env.VITE_REACT_APP_SOCKETIO_API_URL

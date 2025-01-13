@@ -18,12 +18,11 @@ const Navbar = () => {
 
     useEffect(() => {
         if (!user) {
-            navigate("/login"); // Redirect to login if user is not logged in
+            navigate("/login");
         }
     }, [user, navigate]);
 
     const handleLogout = async () => {
-        // Logout logic goes here
 
         try {
             const res = await axios.post(`${USER_API_END_POINT}/logout`, {}, {
@@ -56,9 +55,12 @@ const Navbar = () => {
                         <div>
                             <Popover>
                                 <PopoverTrigger>
-                                    <Avatar>
-                                        <AvatarImage src={user?.user?.avatar} />
-                                    </Avatar>
+                                    <div className="flex justify-center items-center gap-3 font-medium text-lg">
+                                        <Avatar>
+                                            <AvatarImage src={user?.user?.avatar} />
+                                        </Avatar>
+                                        <span>{user?.user?.fullName}</span>
+                                    </div>
                                 </PopoverTrigger>
                                 <PopoverContent>
                                     <div className="flex gap-4 items-center">
@@ -68,7 +70,7 @@ const Navbar = () => {
                                         <div>
                                             <h2>{user?.user?.fullName}</h2>
                                             <p className="text-sm text-muted-foreground">
-                                                {user?.user?.bio}
+                                                {user?.user?.bio || "No bio available"}
                                             </p>
                                         </div>
                                     </div>

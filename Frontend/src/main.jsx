@@ -10,6 +10,8 @@ import { Toaster } from 'sonner'
 import { Provider } from 'react-redux'
 import { store } from './app/store.js'
 import Profile from './components/UserProfile/Profile'
+import { PersistGate } from 'redux-persist/integration/react'
+import { persistStore } from 'redux-persist'
 
 const router = createBrowserRouter([
   {
@@ -31,19 +33,20 @@ const router = createBrowserRouter([
       },
       {
         path: "/profile",
-        element: <Profile/>
+        element: <Profile />
       },
     ]
 
   }
 ])
-
+const persist = persistStore(store)
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* <App /> */}
     <Provider store={store}>
-      <RouterProvider router={router} />
+      <PersistGate loading={null} persistor={persist} >
+        <RouterProvider router={router} />
+      </PersistGate>
     </Provider>
     <Toaster />
-  </StrictMode>,
+  </StrictMode>
 )

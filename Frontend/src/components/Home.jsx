@@ -3,12 +3,12 @@ import LeftContainer from "./ContactContainer/LeftContainer";
 import RightContainer from "./MessageContainer/RightContainer";
 
 const Home = () => {
-
+   
     const [activeChatUser, setActiveChatUser] = useState(null);
 
 
     const handleUserSelect = (user) => {
-        setActiveChatUser(user); // Set the clicked user as the active chat user
+        setActiveChatUser(user); 
     };
 
 

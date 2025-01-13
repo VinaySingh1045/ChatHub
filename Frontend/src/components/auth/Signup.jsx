@@ -40,7 +40,10 @@ const Signup = () => {
         if (userData.avatar) {
             formData.append("avatar", userData.avatar);
         }
-
+        if(!userData.avatar){
+            toast.error("Please select an avatar")
+            return; 
+        }
         try {
             const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
                 headers: {
@@ -49,13 +52,8 @@ const Signup = () => {
                 withCredentials: true,
             });
 
-            console.log(res);
-
-            // setLoading(false);
-
             if (res.data.success) {
-                // alert("Signup Successful");
-                toast.success(res.data.success);
+                toast.success("User created successfully");
                 navigate('/login'); 
             }
 
@@ -70,7 +68,9 @@ const Signup = () => {
 
         } catch (error) {
             setLoading(false);
-            alert('Signup failed. Please try again.');
+            if(error.response && error.response.status === 409) {
+                toast.error("Email already exists")
+            }
             console.error(error);
         }
         finally {
@@ -79,42 +79,6 @@ const Signup = () => {
 
 
     }
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-
-    //     // console.log(userData)
-
-    //     setLoading(true);
-
-    //     const formData = new FormData();
-
-    //     formData.append("fullName", userData.fullName);
-    //     formData.append("email", userData.email);
-    //     formData.append("password", userData.password);
-
-    //     if (userData.avatar) {
-    //         formData.append("avatar", userData.avatar);
-    //     }
-
-    //     try {
-    //         const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
-    //             headers: {
-    //                 'Content-Type': 'multipart/form-data'
-    //             },
-    //             withCredentials: true,
-    //         });
-    //         console.log(res.data)
-    //         setLoading(false);
-
-    //         if (res.data.success) {
-    //             alert("Signup Successful")
-    //         }
-
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-
-    // }
 
     return (
         <>

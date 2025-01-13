@@ -2,6 +2,7 @@ import app from "./app.js";
 import ConnectDb from "./db/ConnectDb.js";
 import http from "http"
 import { Server } from "socket.io"
+import setupSocketIo from "../socket/socket.js"
 import dotenv from 'dotenv';
 dotenv.config();
 const port = process.env.PORT
@@ -31,23 +32,9 @@ ConnectDb()
         console.log(`Server is not listening on port ${port}`, error);
     })
 
-io.on("connection", (socket) => {
-    console.log("Connected Suuccessfully ", socket.id);
 
-    // socket.on("sendChatMessage", (chatMessage) =>{
-    //     io.emit("sendChatMessage", chatMessage); // Jo message bhej the hai vo dekhta hai 
-    // })    
+// Use the Socket.io setup function
+setupSocketIo(io)
 
-    socket.on("joinRoom", (userId) => {
-        socket.join(userId);
-        console.log(`User ${userId} joined room ${userId}`);
-    })
-
-    socket.on("sendChatMessage", ({ reciever, message }) => {
-        io.to(reciever).emit("sendChatMessage", message)
-    })
-
-})
-
-// for Exporting the io 
+// for Exporting the io instance
 app.set("io", io);

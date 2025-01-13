@@ -21,44 +21,40 @@ const Login = () => {
     }
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
-        setLoading(true)
-
-
+        e.preventDefault();
+        setLoading(true);
+    
         try {
             const res = await axios.post(`${USER_API_END_POINT}/login`, userData, {
-                withCredentials: true
-            })
-
-            // console.log(res.data.data)
-
+                withCredentials: true,
+            });
+    
             if (res.data.success) {
-                // const userInfo = res.data.data.user
-                const userInfo = res.data.data
-                dispatch(setUser(userInfo))
-                toast.success(res.data.message)
-                navigate('/')
+                const userInfo = res.data.data;
+                dispatch(setUser(userInfo));
+                toast.success(res.data.message);
+                navigate('/'); 
             } else {
-                navigate("/login")
-                toast.error(res.data.message)
+                toast.error(res.data.message); 
             }
-
+    
             if (res.status === 200) {
                 setUserData({
                     email: "",
                     password: "",
-                })
+                });
             }
         } catch (error) {
-            // console.log(error)
-            toast.error(error)
-
+            if (error.response && error.response.data) {
+                toast.error(error.response.data.message || "Login failed. Invaild User Credentials");
+            } else {
+                toast.error("An unexpected error occurred. Please try again.");
+            }
+        } finally {
+            setLoading(false);
         }
-        finally {
-            setLoading(false)
-        }
-
-    }
+    };
+    
 
     return (
         <>

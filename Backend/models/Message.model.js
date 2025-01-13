@@ -25,8 +25,7 @@ const MessageSchema = new mongoose.Schema({
         default: "sent"
     },
     timestamp: {
-        type: Date,
-        default: Date.now
+        type: String,
     },
     seenBy: [{
         type: Schema.Types.ObjectId,

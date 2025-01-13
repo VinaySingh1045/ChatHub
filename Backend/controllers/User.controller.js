@@ -3,6 +3,7 @@ import { ApiError } from "../utlis/ApiError.js";
 import { User } from "../models/User.model.js";
 import { ApiResponse } from "../utlis/ApiResponse.js";
 import uploadOnCloudinary from "../utlis/Cloudinary.js";
+import jwt from "jsonwebtoken"
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -21,7 +22,6 @@ const generateAccessAndRefreshToken = async (userId) => {
         };
 
     } catch (error) {
-        // console.log("Error:", error );
         throw new ApiError(500, error || "Something went wrong while generating Refresh and Access Token")
     }
 }
@@ -30,7 +30,6 @@ const generateAccessAndRefreshToken = async (userId) => {
 const userRegister = AsyncHandler(async (req, res) => {
     const { fullName, email, password } = req.body
 
-    // console.log("Request Body:", req.body);
 
     // Validation
     if (!fullName || !email || !password) {
@@ -56,7 +55,6 @@ const userRegister = AsyncHandler(async (req, res) => {
     }
 
     const avatar = await uploadOnCloudinary(avatarFilePath);
-    // console.log("Cloudinary response avatar: ", avatar);
 
     // Create the user
     const user = await User.create({
@@ -74,8 +72,6 @@ const userRegister = AsyncHandler(async (req, res) => {
 
 const userLogin = AsyncHandler(async (req, res) => {
     const { email, password } = req.body
-
-    // console.log("Request Body:", req.body);
 
     // Validation
     if (!email || !password) {
@@ -283,6 +279,22 @@ const updateUserContacts = AsyncHandler(async (req, res) => {
 
 })
 
-export { userRegister, userLogin, userLogout, updateUserProfile, updateUserAvatar, searchUsers, getLoginUsers, updateUserContacts, getAllUsers }
+const verifyJWTToken = AsyncHandler(async (req, res) => {
+    const token = req.cookies?.accessToken;
+    if (!token) {
+        throw new ApiError(401, "Unauthorized, token missing from verfiyyy")
+    }
+    try {
+        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        const user = await User.findById(decodedToken._id);
+        return res.status(200).json({user: user})
+
+    } catch (error) {
+        throw new ApiError(401, "Unauthorized, invalid token")
+    }
+
+})
+
+export { userRegister, userLogin, userLogout, updateUserProfile, updateUserAvatar, searchUsers, getLoginUsers, updateUserContacts, getAllUsers, verifyJWTToken }
 
 
