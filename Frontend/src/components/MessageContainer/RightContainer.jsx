@@ -100,8 +100,9 @@ const RightContainer = ({ activeUser }) => {
                         className="w-10 h-10 rounded-full"
                     />
                     <div>
-                        <p className="text-sm font-medium">{activeUser?.fullName}</p>
-                        <p className="text-xs text-green-500">Online</p>
+                        <p className="text-lg font-medium">{activeUser?.fullName}</p>
+                        <p className="text-xs font-normal">{activeUser?.bio}</p>
+                        {/* <p className="text-xs text-green-500">Online</p> */}
                     </div>
                 </div>
                 <div className="flex gap-4">

@@ -124,7 +124,7 @@ const LeftContainer = ({ onSelectUser }) => {
                                     alt={contact.fullName}
                                     className="w-10 h-10 rounded-full"
                                 />
-                                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-white"></span>
+                                {/* <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-white"></span> */}
                             </div>
                             <div>
                                 <p className="text-sm font-medium">{contact.fullName}</p>
