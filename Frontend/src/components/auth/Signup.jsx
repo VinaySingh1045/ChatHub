@@ -71,7 +71,7 @@ const Signup = () => {
             if(error.response && error.response.status === 409) {
                 toast.error("Email already exists")
             }
-            console.error(error);
+            console.error("Error Frontend",error);
         }
         finally {
             setLoading(false)
