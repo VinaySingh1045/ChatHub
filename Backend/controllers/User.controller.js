@@ -111,6 +111,7 @@ const userLogin = AsyncHandler(async (req, res) => {
     // Set cookies options
     const options = {
         httpOnly: true,
+        sameSite: "none",
         secure: true
     };
 
@@ -140,6 +141,7 @@ const userLogout = AsyncHandler(async (req, res) => {
 
         const options = {
             httpOnly: true,
+            sameSite: "none",
             secure: true
         }
 
@@ -287,7 +289,7 @@ const verifyJWTToken = AsyncHandler(async (req, res) => {
     try {
         const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
         const user = await User.findById(decodedToken._id);
-        return res.status(200).json({user: user})
+        return res.status(200).json({ user: user })
 
     } catch (error) {
         throw new ApiError(401, "Unauthorized, invalid token")
