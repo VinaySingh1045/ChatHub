@@ -1,16 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LeftContainer from "./ContactContainer/LeftContainer";
 import RightContainer from "./MessageContainer/RightContainer";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
-   
-    const [activeChatUser, setActiveChatUser] = useState(null);
 
+    const [activeChatUser, setActiveChatUser] = useState(null);
+    const { user } = useSelector((state) => state.auth);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!user) {
+            navigate("/login")
+        }
+    }, [navigate, user]);
 
     const handleUserSelect = (user) => {
-        setActiveChatUser(user); 
+        setActiveChatUser(user);
     };
-
 
     return (
         <>
