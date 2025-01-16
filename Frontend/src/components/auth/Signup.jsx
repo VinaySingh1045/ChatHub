@@ -67,7 +67,6 @@ const Signup = () => {
             }
 
         } catch (error) {
-            setLoading(false);
             if(error.response && error.response.status === 409) {
                 toast.error("Email already exists")
             }
