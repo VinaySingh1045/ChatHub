@@ -20,7 +20,7 @@ const router = createBrowserRouter([
 
     children: [
       {
-        path: "",
+        path: "/",
         element: <Home />
       },
       {
@@ -37,6 +37,9 @@ const router = createBrowserRouter([
       },
     ]
 
+  },{
+    path:"/*",
+    element: <h1>404 Not Found</h1>
   }
 ])
 const persist = persistStore(store)
